@@ -4,5 +4,16 @@ A new Flutter project.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+- Dart 
+- flutter
+- Bloc state managment
+- Firebase
+- Shared preferences
+- Api
+- flutter_payment_checkout
+- Awesome dialoge
+- flutter_credit_card
+- mailer
+- google_sign_in
+
 
