@@ -1,12 +1,7 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shopping_ecommerce_app/main_content/data/datasource/address_datasource.dart';
-import 'package:shopping_ecommerce_app/main_content/data/repository/address_repository.dart';
 import 'package:shopping_ecommerce_app/main_content/domain/entity/address.dart';
-import 'package:shopping_ecommerce_app/main_content/domain/repository/base_address_repository.dart';
-import 'package:shopping_ecommerce_app/main_content/domain/usecase/address_usecase.dart';
 import 'package:shopping_ecommerce_app/main_content/presentation/controller/bloc.dart';
 import 'package:shopping_ecommerce_app/main_content/presentation/controller/bloc_event.dart';
 import 'package:shopping_ecommerce_app/main_content/presentation/controller/bloc_state.dart';
@@ -28,9 +23,6 @@ class AddressDetailsPageBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isPrimaryAddress = false;
-    BaseAddressDatasource baseAddressDatasource = AddressDatasource();
-    BaseAddressRepository baseAddressRepository = AddressRepository(baseAddressDatasource);
-    BaseAddressUseCase baseAddressUseCase = AddressUseCase(baseAddressRepository);
     return Container(
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height,
@@ -98,58 +90,62 @@ class AddressDetailsPageBody extends StatelessWidget {
           ),
           const SizedBox(height: 50,),
           // button to save address
-          BlocProvider(
-            create: (context) => AddressBloc(baseAddressUseCase),
-            child: BlocBuilder<AddressBloc, ItemBlocState>(
-              buildWhen: (previous, current) => previous != current,
-              builder: (context, state) {
-                if(state is AddAddressDataState){
-                  if(state.result == true){
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) {
-                      return CartPage(
-                        address: textEditingControllerList[4].text.trim(),
+          BlocBuilder<AddressBloc, ItemBlocState>(
+            buildWhen: (previous, current) => previous != current,
+            builder: (context, state) {
+              bool result = state is AddAddressDataState?state.result:false;
+              if(result == true){
+                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) {
+                  return CartPage(
+                    address: textEditingControllerList[4].text.trim(),
+                    city: textEditingControllerList[2].text.trim(),
+                  );
+                },));
+              }
+              return InkWell(
+                onTap: (){
+                  // TODO: when click on it save the address data
+                  if(_formKey.currentState!.validate()){
+                    BlocProvider.of<AddressBloc>(context).add(AddAddressDataEvent(Address(
+                        name: textEditingControllerList[0].text.trim(),
+                        country: textEditingControllerList[1].text.trim(),
                         city: textEditingControllerList[2].text.trim(),
-                      );
-                    },));
-                  }
-                }
-                return InkWell(
-                  onTap: (){
-                    // TODO: when click on it save the address data
-                    if(_formKey.currentState!.validate()){
-                      BlocProvider.of<AddressBloc>(context).add(AddAddressDataEvent(Address(
-                          name: textEditingControllerList[0].text.trim(),
-                          country: textEditingControllerList[1].text.trim(),
-                          city: textEditingControllerList[2].text.trim(),
-                          phoneNumber: textEditingControllerList[3].text.trim(),
+                        phoneNumber: textEditingControllerList[3].text.trim(),
+                        address: textEditingControllerList[4].text.trim(),
+                        saveAddress: isPrimaryAddress
+                    )));
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) {
+                        return CartPage(
                           address: textEditingControllerList[4].text.trim(),
-                          saveAddress: isPrimaryAddress
-                      )));
-                    }else{
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Error: complete all fields")));
-                    }
-                  },
-                  child: Container(
-                    width: MediaQuery.of(context).size.width-50,
-                    height: 70,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: ConstantColor.splashGgColor,
-                    ),
-                    child: const Text(
-                      "save address",
-                      style: TextStyle(
-                        fontSize: 25,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                          city: textEditingControllerList[2].text.trim(),
+                        );
+                      }));
+                    });
+                  }else{
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Error: complete all fields")));
+                  }
+                },
+                child: Container(
+                  width: MediaQuery.of(context).size.width-50,
+                  height: 70,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: ConstantColor.splashGgColor,
                   ),
-                );
-              },
-            ),
+                  child: const Text(
+                    "save address",
+                    style: TextStyle(
+                      fontSize: 25,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),
